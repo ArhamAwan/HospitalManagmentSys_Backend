@@ -30,7 +30,15 @@ export function emitQueueUpdate(payload: { doctorId: string; currentToken: numbe
   getIO().to('display').emit('queue:update', payload);
 }
 
-export function emitEmergencyActive(payload: { doctorId: string; isActive: boolean }) {
+export function emitEmergencyActive(payload: {
+  doctorId: string;
+  isActive: boolean;
+  // Optional metadata for richer UIs.
+  visitId?: string;
+  tokenNumber?: number;
+  patientName?: string;
+  roomNumber?: string;
+}) {
   getIO().emit('emergency:active', payload);
   getIO().to(`doctor:${payload.doctorId}`).emit('emergency:active', payload);
   getIO().to('display').emit('emergency:active', payload);

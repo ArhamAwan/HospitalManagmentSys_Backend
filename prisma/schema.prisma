@@ -12,7 +12,10 @@ model User {
   username  String   @unique
   password  String   // bcrypt hashed
   role      Role
+  status    UserStatus @default(ACTIVE)
   doctor    Doctor?
+  auditLogs      UserAuditLog[] @relation("UserAuditLogUser")
+  actorAuditLogs UserAuditLog[] @relation("UserAuditLogActor")
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
@@ -21,6 +24,12 @@ enum Role {
   ADMIN
   RECEPTION
   DOCTOR
+}
+
+enum UserStatus {
+  ACTIVE
+  LOCKED
+  DISABLED
 }
 
 model Patient {
@@ -59,6 +68,37 @@ model Doctor {
   updatedAt       DateTime @updatedAt
 }
 
+model Room {
+  id        String   @id @default(uuid())
+  code      String   @unique
+  name      String
+  floor     String?
+  status    RoomStatus @default(ACTIVE)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([code])
+}
+
+enum RoomStatus {
+  ACTIVE
+  INACTIVE
+  MAINTENANCE
+}
+
+model Procedure {
+  id          String   @id @default(uuid())
+  code        String   @unique
+  name        String
+  department  String?
+  defaultFee  Float
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([code])
+  @@index([department])
+}
+
 model Visit {
   id              String       @id @default(uuid())
   patientId       String
@@ -72,6 +112,7 @@ model Visit {
   consultationFee Float
   prescription    Prescription?
   payment         Payment?
+  invoice         Invoice?
   createdAt       DateTime     @default(now())
   updatedAt       DateTime     @updatedAt
   completedAt     DateTime?
@@ -121,4 +162,119 @@ enum PaymentType {
   CONSULTATION
   EMERGENCY
 }
+
+// New billing system (full invoices, items, partial payments, receipts).
+model Invoice {
+  id        String        @id @default(uuid())
+  visitId   String        @unique
+  visit     Visit         @relation(fields: [visitId], references: [id])
+  status    InvoiceStatus @default(DRAFT)
+
+  items     InvoiceItem[]
+  payments  PaymentTransaction[]
+  receipt   Receipt?
+
+  // Totals are persisted for quick reads; computed/validated in service layer.
+  subtotal  Float         @default(0)
+  discount  Float         @default(0)
+  tax       Float         @default(0)
+  total     Float         @default(0)
+  paidTotal Float         @default(0)
+  balanceDue Float        @default(0)
+
+  issuedAt  DateTime?
+  voidedAt  DateTime?
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+
+  @@index([status])
+  @@index([createdAt])
+}
+
+model InvoiceItem {
+  id          String             @id @default(uuid())
+  invoiceId   String
+  invoice     Invoice            @relation(fields: [invoiceId], references: [id])
+
+  description String
+  category    InvoiceItemCategory
+  quantity    Int                @default(1)
+  unitPrice   Float
+  lineTotal   Float
+
+  createdAt   DateTime           @default(now())
+
+  @@index([invoiceId])
+}
+
+model PaymentTransaction {
+  id        String        @id @default(uuid())
+  invoiceId String
+  invoice   Invoice       @relation(fields: [invoiceId], references: [id])
+
+  amount    Float
+  method    PaymentMethod
+  reference String?
+  createdAt DateTime      @default(now())
+
+  @@index([invoiceId])
+  @@index([createdAt])
+}
+
+model Receipt {
+  id            String   @id @default(uuid())
+  invoiceId     String   @unique
+  invoice       Invoice  @relation(fields: [invoiceId], references: [id])
+  receiptNumber String   @unique
+  snapshot      Json
+  createdAt     DateTime @default(now())
+}
+
+enum InvoiceStatus {
+  DRAFT
+  ISSUED
+  PARTIALLY_PAID
+  PAID
+  VOID
+}
+
+enum InvoiceItemCategory {
+  CONSULTATION
+  EMERGENCY
+  LAB
+  IMAGING
+  MEDICINE
+  PROCEDURE
+  OTHER
+}
+
+enum PaymentMethod {
+  CASH
+  CARD
+  BANK_TRANSFER
+  MOBILE_WALLET
+  OTHER
+}
+
+model UserAuditLog {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation("UserAuditLogUser", fields: [userId], references: [id])
+  actorId   String?
+  actor     User?    @relation("UserAuditLogActor", fields: [actorId], references: [id])
+  action    String
+  details   Json?
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([actorId])
+  @@index([createdAt])
+}
+
+model Setting {
+  key       String   @id
+  value     String
+  updatedAt DateTime @updatedAt
+}
+
 

@@ -14,6 +14,12 @@ import visitRoutes from './routes/visitRoutes';
 import doctorRoutes from './routes/doctorRoutes';
 import prescriptionRoutes from './routes/prescriptionRoutes';
 import paymentRoutes from './routes/paymentRoutes';
+import adminUserRoutes from './routes/adminUserRoutes';
+import adminConfigRoutes from './routes/adminConfigRoutes';
+import adminSettingsRoutes from './routes/adminSettingsRoutes';
+import reportRoutes from './routes/reportRoutes';
+import adminAuditRoutes from './routes/adminAuditRoutes';
+import invoiceRoutes from './routes/invoiceRoutes';
 
 import { initializeSocket } from './socket/socketHandler';
 
@@ -54,6 +60,12 @@ app.use('/api/visits', visitRoutes);
 app.use('/api/doctors', doctorRoutes);
 app.use('/api/prescriptions', prescriptionRoutes);
 app.use('/api/payments', paymentRoutes);
+app.use('/api/admin/users', adminUserRoutes);
+app.use('/api/admin/config', adminConfigRoutes);
+app.use('/api/admin/settings', adminSettingsRoutes);
+app.use('/api/reports', reportRoutes);
+app.use('/api/admin/audit-logs', adminAuditRoutes);
+app.use('/api/invoices', invoiceRoutes);
 
 app.get('/health', (_req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });

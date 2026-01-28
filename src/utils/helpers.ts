@@ -44,3 +44,21 @@ export function minutesSince(date: Date): number {
   return Math.max(0, Math.round((now - then) / (1000 * 60)));
 }
 
+// Simple sequential room code generator: R-0001, R-0002, ...
+export async function generateRoomCode(): Promise<string> {
+  const { prisma } = await import('../config/database');
+
+  const count = await prisma.room.count();
+  const seq = String(count + 1).padStart(4, '0');
+  return `R-${seq}`;
+}
+
+// Simple sequential procedure code generator: PR-0001, PR-0002, ...
+export async function generateProcedureCode(): Promise<string> {
+  const { prisma } = await import('../config/database');
+
+  const count = await prisma.procedure.count();
+  const seq = String(count + 1).padStart(4, '0');
+  return `PR-${seq}`;
+}
+

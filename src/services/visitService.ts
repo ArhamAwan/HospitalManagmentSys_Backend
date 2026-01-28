@@ -1,5 +1,6 @@
 import { prisma } from '../config/database';
-import { generateTokenNumber, minutesSince, startOfToday } from '../utils/helpers';
+import { generateTokenNumber, minutesSince } from '../utils/helpers';
+import { getSettings } from './settingService';
 import { emitDoctorQueueRefresh, emitEmergencyActive, emitQueueUpdate } from '../socket/socketHandler';
 
 export async function createVisit(input: { patientId: string; doctorId: string; isEmergency?: boolean }) {
@@ -26,6 +27,18 @@ export async function createVisit(input: { patientId: string; doctorId: string; 
       doctor: true
     }
   });
+
+  if (visit.isEmergency) {
+    // Notify all relevant screens immediately.
+    emitEmergencyActive({
+      doctorId: doctor.id,
+      isActive: true,
+      visitId: visit.id,
+      tokenNumber: visit.tokenNumber,
+      patientName: patient.name,
+      roomNumber: doctor.roomNumber
+    });
+  }
 
   emitDoctorQueueRefresh({ doctorId: doctor.id });
 
@@ -91,22 +104,35 @@ export async function completeVisit(id: string) {
   return { visit: updated };
 }
 
+export async function getTokenResetStart(): Promise<Date> {
+  const settings = await getSettings();
+  const [h, m] = settings.tokenResetTime.split(':').map((n) => Number(n));
+  const now = new Date();
+  const start = new Date(now);
+  start.setHours(h, m, 0, 0);
+  // If it's before today's reset time, use previous day.
+  if (now < start) {
+    start.setDate(start.getDate() - 1);
+  }
+  return start;
+}
+
 export async function getTodayVisits() {
-  const today = startOfToday();
+  const start = await getTokenResetStart();
   return prisma.visit.findMany({
-    where: { visitDate: { gte: today } },
+    where: { visitDate: { gte: start } },
     include: { patient: true, doctor: true },
     orderBy: { visitDate: 'desc' }
   });
 }
 
 export async function getDoctorQueue(doctorId: string) {
-  const today = startOfToday();
+  const start = await getTokenResetStart();
 
   const visits = await prisma.visit.findMany({
     where: {
       doctorId,
-      visitDate: { gte: today },
+      visitDate: { gte: start },
       status: 'WAITING'
     },
     include: {
