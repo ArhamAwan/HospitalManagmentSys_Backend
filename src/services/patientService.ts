@@ -40,6 +40,15 @@ export async function searchPatients(query: string) {
   return patients;
 }
 
+export async function listRecentPatients(limit = 50) {
+  const patients = await prisma.patient.findMany({
+    orderBy: { createdAt: 'desc' },
+    take: limit
+  });
+
+  return patients;
+}
+
 export async function getPatientById(id: string) {
   return prisma.patient.findUnique({ where: { id } });
 }
@@ -53,7 +62,17 @@ export async function getPatientHistory(patientId: string) {
       }
     },
     include: {
-      doctor: true
+      doctor: true,
+      prescription: {
+        include: {
+          medicines: true
+        }
+      },
+      procedureOrders: {
+        include: {
+          procedure: true
+        }
+      }
     },
     orderBy: { visitDate: 'desc' },
     take: 50

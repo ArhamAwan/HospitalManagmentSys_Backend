@@ -21,9 +21,9 @@ export async function createPatient(req: Request, res: Response) {
 
 export async function searchPatients(req: Request, res: Response) {
   const q = String(req.query.q ?? '').trim();
-  if (q.length < 2) return res.json([]);
 
-  const patients = await patientService.searchPatients(q);
+  const patients =
+    q.length < 2 ? await patientService.listRecentPatients() : await patientService.searchPatients(q);
   return res.json(
     patients.map((p) => ({
       ...p,

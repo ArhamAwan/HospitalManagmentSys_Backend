@@ -1,5 +1,5 @@
 import type { Request, Response } from 'express';
-import { getBillingSummary, getDailyVisits, getQueueStats } from '../services/reportService';
+import { getBillingSummary, getDailyVisits, getQueueStats, getTotalPatients } from '../services/reportService';
 import { fail } from '../utils/response';
 
 export async function dailyVisits(req: Request, res: Response) {
@@ -36,6 +36,11 @@ export async function queueStats(req: Request, res: Response) {
     return fail(res, 400, 'VALIDATION_ERROR', 'Invalid date format');
   }
   const data = await getQueueStats(base);
+  return res.json(data);
+}
+
+export async function totalPatients(_req: Request, res: Response) {
+  const data = await getTotalPatients();
   return res.json(data);
 }
 

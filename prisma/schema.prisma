@@ -92,6 +92,7 @@ model Procedure {
   name        String
   department  String?
   defaultFee  Float
+  orders      ProcedureOrder[]
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
@@ -113,6 +114,7 @@ model Visit {
   prescription    Prescription?
   payment         Payment?
   invoice         Invoice?
+  procedureOrders ProcedureOrder[]
   createdAt       DateTime     @default(now())
   updatedAt       DateTime     @updatedAt
   completedAt     DateTime?
@@ -275,6 +277,26 @@ model Setting {
   key       String   @id
   value     String
   updatedAt DateTime @updatedAt
+}
+
+model ProcedureOrder {
+  id          String            @id @default(uuid())
+  visitId     String
+  visit       Visit             @relation(fields: [visitId], references: [id])
+  procedureId String
+  procedure   Procedure         @relation(fields: [procedureId], references: [id])
+  notes       String?
+  status      ProcedureStatus   @default(REQUESTED)
+  createdAt   DateTime          @default(now())
+
+  @@index([visitId])
+  @@index([procedureId])
+  @@index([status])
+}
+
+enum ProcedureStatus {
+  REQUESTED
+  COMPLETED
 }
 
 

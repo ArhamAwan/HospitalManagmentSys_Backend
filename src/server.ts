@@ -20,6 +20,7 @@ import adminSettingsRoutes from './routes/adminSettingsRoutes';
 import reportRoutes from './routes/reportRoutes';
 import adminAuditRoutes from './routes/adminAuditRoutes';
 import invoiceRoutes from './routes/invoiceRoutes';
+import procedureOrderRoutes from './routes/procedureOrderRoutes';
 
 import { initializeSocket } from './socket/socketHandler';
 
@@ -45,12 +46,20 @@ app.use(
 app.use(helmet());
 app.use(express.json());
 
-const authLimiter = rateLimit({
-  windowMs: 60 * 1000,
-  limit: 60,
-  standardHeaders: true,
-  legacyHeaders: false
-});
+const authLimiter =
+  env.NODE_ENV === 'production'
+    ? rateLimit({
+        windowMs: 60 * 1000,
+        limit: 60,
+        standardHeaders: true,
+        legacyHeaders: false
+      })
+    : rateLimit({
+        windowMs: 60 * 1000,
+        limit: 600,
+        standardHeaders: true,
+        legacyHeaders: false
+      });
 
 app.use('/api/auth', authLimiter);
 
@@ -66,6 +75,7 @@ app.use('/api/admin/settings', adminSettingsRoutes);
 app.use('/api/reports', reportRoutes);
 app.use('/api/admin/audit-logs', adminAuditRoutes);
 app.use('/api/invoices', invoiceRoutes);
+app.use('/api/procedure-orders', procedureOrderRoutes);
 
 app.get('/health', (_req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });

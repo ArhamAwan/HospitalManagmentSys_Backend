@@ -1,6 +1,11 @@
 import { prisma } from '../config/database';
 import { getTokenResetStart } from './visitService';
 
+export async function getTotalPatients() {
+  const count = await prisma.patient.count();
+  return { totalPatients: count };
+}
+
 export async function getDailyVisits(date: Date) {
   const start = new Date(date);
   start.setHours(0, 0, 0, 0);
