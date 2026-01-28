@@ -1,0 +1,124 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(uuid())
+  username  String   @unique
+  password  String   // bcrypt hashed
+  role      Role
+  doctor    Doctor?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+enum Role {
+  ADMIN
+  RECEPTION
+  DOCTOR
+}
+
+model Patient {
+  id        String   @id @default(uuid())
+  patientId String   @unique // P-YYYYMMDD-XXXX
+  name      String
+  age       Int
+  gender    Gender
+  phone     String
+  address   String?
+  visits    Visit[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([patientId])
+  @@index([name])
+  @@index([phone])
+}
+
+enum Gender {
+  MALE
+  FEMALE
+  OTHER
+}
+
+model Doctor {
+  id              String   @id @default(uuid())
+  userId          String   @unique
+  user            User     @relation(fields: [userId], references: [id])
+  name            String
+  specialization  String
+  consultationFee Float
+  roomNumber      String
+  visits          Visit[]
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+model Visit {
+  id              String       @id @default(uuid())
+  patientId       String
+  patient         Patient      @relation(fields: [patientId], references: [id])
+  doctorId        String
+  doctor          Doctor       @relation(fields: [doctorId], references: [id])
+  tokenNumber     Int
+  visitDate       DateTime     @default(now())
+  status          VisitStatus  @default(WAITING)
+  isEmergency     Boolean      @default(false)
+  consultationFee Float
+  prescription    Prescription?
+  payment         Payment?
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+  completedAt     DateTime?
+
+  @@index([doctorId, visitDate])
+  @@index([status])
+}
+
+enum VisitStatus {
+  WAITING
+  IN_CONSULTATION
+  COMPLETED
+  CANCELLED
+}
+
+model Prescription {
+  id            String                  @id @default(uuid())
+  visitId       String                  @unique
+  visit         Visit                   @relation(fields: [visitId], references: [id])
+  diagnosis     String?
+  clinicalNotes String?
+  medicines     PrescriptionMedicine[]
+  createdAt     DateTime                @default(now())
+}
+
+model PrescriptionMedicine {
+  id             String       @id @default(uuid())
+  prescriptionId String
+  prescription   Prescription @relation(fields: [prescriptionId], references: [id])
+  medicineName   String
+  dosage         String
+  frequency      String
+  duration       String
+  instructions   String?
+}
+
+model Payment {
+  id          String      @id @default(uuid())
+  visitId     String      @unique
+  visit       Visit       @relation(fields: [visitId], references: [id])
+  amount      Float
+  paymentType PaymentType
+  createdAt   DateTime    @default(now())
+}
+
+enum PaymentType {
+  CONSULTATION
+  EMERGENCY
+}
+
