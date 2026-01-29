@@ -145,6 +145,7 @@ export async function listProcedures(req: Request, res: Response) {
       name: p.name,
       department: p.department,
       defaultFee: p.defaultFee,
+      hourlyRate: p.hourlyRate,
       createdAt: p.createdAt.toISOString()
     }))
   );
@@ -167,6 +168,7 @@ export async function createProcedure(req: Request, res: Response) {
       name: p.name,
       department: p.department,
       defaultFee: p.defaultFee,
+      hourlyRate: p.hourlyRate,
       createdAt: p.createdAt.toISOString()
     });
   } catch (err) {
@@ -195,6 +197,7 @@ export async function updateProcedure(req: Request, res: Response) {
       name: p.name,
       department: p.department,
       defaultFee: p.defaultFee,
+      hourlyRate: p.hourlyRate,
       createdAt: p.createdAt.toISOString()
     });
   } catch (err) {

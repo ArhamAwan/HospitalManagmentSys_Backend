@@ -149,3 +149,27 @@ export async function getDoctorQueue(doctorId: string) {
   }));
 }
 
+export async function getDoctorHistory(doctorId: string, limit: number = 100) {
+  return prisma.visit.findMany({
+    where: {
+      doctorId
+    },
+    include: {
+      patient: true,
+      doctor: true,
+      prescription: {
+        include: {
+          medicines: true
+        }
+      },
+      procedureOrders: {
+        include: {
+          procedure: true
+        }
+      }
+    },
+    orderBy: { visitDate: 'desc' },
+    take: limit
+  });
+}
+

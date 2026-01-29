@@ -76,12 +76,12 @@ export const createPaymentSchema = z.object({
 export const createUserSchema = z.object({
   username: z.string().min(3),
   password: z.string().min(8),
-  role: z.enum(['ADMIN', 'RECEPTION', 'DOCTOR'])
+  role: z.enum(['ADMIN', 'RECEPTION', 'DOCTOR', 'NURSE', 'DISPLAY'])
 });
 
 export const updateUserSchema = z.object({
   username: z.string().min(3).optional(),
-  role: z.enum(['ADMIN', 'RECEPTION', 'DOCTOR']).optional(),
+  role: z.enum(['ADMIN', 'RECEPTION', 'DOCTOR', 'NURSE', 'DISPLAY']).optional(),
   status: z.enum(['ACTIVE', 'LOCKED', 'DISABLED']).optional()
 });
 

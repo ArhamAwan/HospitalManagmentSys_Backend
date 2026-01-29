@@ -70,7 +70,40 @@ export async function getPatientHistory(req: Request, res: Response) {
             consultationFee: v.doctor.consultationFee,
             roomNumber: v.doctor.roomNumber
           }
-        : undefined
+        : undefined,
+      prescription: v.prescription
+        ? {
+            id: v.prescription.id,
+            visitId: v.prescription.visitId,
+            diagnosis: v.prescription.diagnosis,
+            clinicalNotes: v.prescription.clinicalNotes,
+            medicines: v.prescription.medicines.map((m) => ({
+              id: m.id,
+              prescriptionId: m.prescriptionId,
+              medicineName: m.medicineName,
+              dosage: m.dosage,
+              frequency: m.frequency,
+              duration: m.duration,
+              instructions: m.instructions
+            })),
+            createdAt: v.prescription.createdAt.toISOString()
+          }
+        : undefined,
+      procedureOrders: v.procedureOrders.map((o) => ({
+        id: o.id,
+        visitId: o.visitId,
+        procedureId: o.procedureId,
+        procedure: {
+          id: o.procedure.id,
+          code: o.procedure.code,
+          name: o.procedure.name,
+          department: o.procedure.department,
+          defaultFee: o.procedure.defaultFee
+        },
+        notes: o.notes,
+        status: o.status,
+        createdAt: o.createdAt.toISOString()
+      }))
     }))
   );
 }

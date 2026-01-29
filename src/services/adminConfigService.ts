@@ -68,6 +68,7 @@ export async function createProcedure(input: {
   name: string;
   department?: string | null;
   defaultFee: number;
+  hourlyRate?: number | null;
 }) {
   const code = input.code || (await generateProcedureCode());
   return prisma.procedure.create({
@@ -75,21 +76,23 @@ export async function createProcedure(input: {
       code,
       name: input.name,
       department: input.department ?? null,
-      defaultFee: input.defaultFee
+      defaultFee: input.defaultFee,
+      hourlyRate: input.hourlyRate ?? null
     }
   });
 }
 
 export async function updateProcedure(
   id: string,
-  input: Partial<{ code: string; name: string; department: string | null; defaultFee: number }>
+  input: Partial<{ code: string; name: string; department: string | null; defaultFee: number; hourlyRate: number | null }>
 ) {
   return prisma.procedure.update({
     where: { id },
     data: {
       name: input.name,
       department: input.department,
-      defaultFee: input.defaultFee
+      defaultFee: input.defaultFee,
+      hourlyRate: input.hourlyRate
     }
   });
 }

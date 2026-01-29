@@ -24,6 +24,8 @@ enum Role {
   ADMIN
   RECEPTION
   DOCTOR
+  NURSE
+  DISPLAY
 }
 
 enum UserStatus {
@@ -92,6 +94,7 @@ model Procedure {
   name        String
   department  String?
   defaultFee  Float
+  hourlyRate  Float?
   orders      ProcedureOrder[]
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
@@ -287,6 +290,8 @@ model ProcedureOrder {
   procedure   Procedure         @relation(fields: [procedureId], references: [id])
   notes       String?
   status      ProcedureStatus   @default(REQUESTED)
+  startedAt   DateTime?
+  completedAt DateTime?
   createdAt   DateTime          @default(now())
 
   @@index([visitId])
@@ -296,6 +301,7 @@ model ProcedureOrder {
 
 enum ProcedureStatus {
   REQUESTED
+  IN_PROGRESS
   COMPLETED
 }
 

@@ -28,6 +28,30 @@ async function main() {
     }
   });
 
+  // Create nurse user
+  const nursePassword = await bcrypt.hash('nurse123', 10);
+  await prisma.user.upsert({
+    where: { username: 'nurse1' },
+    update: {},
+    create: {
+      username: 'nurse1',
+      password: nursePassword,
+      role: 'NURSE'
+    }
+  });
+
+  // Create display user (for waiting area screen)
+  const displayPassword = await bcrypt.hash('display123', 10);
+  await prisma.user.upsert({
+    where: { username: 'display1' },
+    update: {},
+    create: {
+      username: 'display1',
+      password: displayPassword,
+      role: 'DISPLAY'
+    }
+  });
+
   // Create doctor users and profiles
   const doctors = [
     {

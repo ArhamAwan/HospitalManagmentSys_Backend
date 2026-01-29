@@ -20,7 +20,7 @@ export async function listUsers() {
   }));
 }
 
-export async function createUser(input: { username: string; password: string; role: 'ADMIN' | 'RECEPTION' | 'DOCTOR' }) {
+export async function createUser(input: { username: string; password: string; role: 'ADMIN' | 'RECEPTION' | 'DOCTOR' | 'NURSE' | 'DISPLAY' }) {
   const hash = await bcrypt.hash(input.password, 10);
 
   const user = await prisma.user.create({
@@ -42,7 +42,7 @@ export async function createUser(input: { username: string; password: string; ro
 
 export async function updateUser(
   id: string,
-  input: Partial<{ username: string; role: 'ADMIN' | 'RECEPTION' | 'DOCTOR'; status: 'ACTIVE' | 'LOCKED' | 'DISABLED' }>,
+  input: Partial<{ username: string; role: 'ADMIN' | 'RECEPTION' | 'DOCTOR' | 'NURSE' | 'DISPLAY'; status: 'ACTIVE' | 'LOCKED' | 'DISABLED' }>,
   actorId?: string
 ) {
   const user = await prisma.user.update({
